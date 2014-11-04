@@ -1,5 +1,31 @@
-#Hacker News thread 'who's hiring?' crawler
+#Hacker News crawler for  _who's hiring?_ thread
 
-Posts id are saved to a file, so only new postings are added ad or sent by email. 
+Saves only top level posts, comments / replies are removed.
 
-Note that only top level posts are shown, possibly after filtering. Comments / replies are removed.
+Uses a file to store seen id, so that only new posting are added each time.
+
+Sends an email with the number of new posting once the crawling is done.
+
+Usage:
+
+    python3 hn_crawler.py you@email.com
+
+It is also possible to send to more than one receiver
+
+    python3 hn_crawler.py you@email.com friend@email.com
+
+The sender of the email can be changed (otherwise the first address will be used)
+
+    python3 hn_crawler.py you@email.com friend@email.com -sender me@email.com
+
+Other options are
+
+    -email False
+
+to create only the file withohut sending the email
+
+    -output name
+
+to rename the output file (defaults to `month_year.html`)
+
+
