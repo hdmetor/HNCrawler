@@ -22,7 +22,7 @@ Other options are
 
     -email False
 
-to create only the file withohut sending the email
+to create only the file withohut sending the email, and
 
     -output name
 
