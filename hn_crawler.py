@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("receivers",help="email address where updates should be sent to", nargs='+')
 parser.add_argument("-sender",help="sender of the email\ndefaults to the first of the receivers")
 parser.add_argument("-output",help="name of the output file\n defaults to month+year", default='')
-parser.add_argument("-email",help="option to send an email in case new jobs have been posted", default=True)
+parser.add_argument("-NoEmail",help="option to send an email in case new jobs have been posted", action='store_true')
 
 args = parser.parse_args()
 
@@ -26,7 +26,7 @@ else:
     path = month + '_' + year + '.html'
 
 root = "http://news.ycombinator.com/item?id="
-id = "8542892"
+id = "8394339"
 file_loc = 'appeared_id.txt'
 
 def cool_job(text):
@@ -39,7 +39,7 @@ def cool_job(text):
                 'game', 'videogame',
                 'algo', 'algoritmic',
                 'machine learning', 'learning', 'deep learning']
-    languages = ['python', 'go', 'mathematica', 'c++']
+    languages = ['python', 'go', 'mathematica', 'c++', 'c']
     conds = [string.lower() for string in locations + subjects + languages]
     return any([cond in small_text for cond in conds ])
 
@@ -115,7 +115,8 @@ for post in posts[4:]:
 new_posting = list(set(posting_id)- set(old_postings))
 
 
-if args.email:
+if not args.NoEmail:
+
     send_mail(new_posting)
 
 create_file(new_posting)
