@@ -18,9 +18,9 @@ The sender of the email can be changed (otherwise the first address will be used
 
     python3 hn_crawler.py you@email.com friend@email.com -sender me@email.com
 
-Other options are
+Is it also possible to add the flag
 
-    -email False
+    -NoEmail
 
 to create only the file withohut sending the email, and
 
