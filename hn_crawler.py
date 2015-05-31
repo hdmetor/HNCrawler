@@ -16,7 +16,7 @@ args = parser.parse_args()
 
 # local changes
 smtpServer = ""
-file_loc = "old_ids.txt"
+old_ids = "old_ids.txt"
 
 day = str(datetime.datetime.now().day)
 month = str(datetime.datetime.now().month)
@@ -51,7 +51,7 @@ def create_file (ids):
     with open(path, 'a') as fp:
         title = '<h1>Date added: '+ day + '/ ' + month + '</h1>'
         fp.write(title)
-        for id in list:
+        for id in ids:
             if str(infos[id]['text']) == '':
                 return
             code = '<p><a href=' + root + id  + '>'+ '<h2>' + infos[id]['user'] + '</h2>' +'</a></p>' + '<p>' + str(infos[id]['text']) + '</p>'
@@ -95,7 +95,7 @@ posting_id = []
 posts = soup.findAll('td')[4].findAll('tr')
 
 # This jobs were already considered
-old_postings = [line.strip() for line in open("news.txt", 'r')]
+old_postings = [line.strip() for line in open(old_ids, 'r')]
 
 infos = {}
 
@@ -118,12 +118,13 @@ for post in posts[4:]:
 
 
 new_posting = list(set(posting_id) - set(old_postings))
+
 if not args.NoEmail:
     send_mail(new_posting)
 create_file(new_posting)
-
+print("Found ", len(new_posting), " jobs!")
 # archive ids for future use
 if new_posting != []:
-    with open(file_loc, 'a+') as fp:
+    with open(old_ids, 'a+') as fp:
         for id in new_posting:
             fp.write(id + '\n')
