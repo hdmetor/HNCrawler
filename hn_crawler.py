@@ -7,7 +7,8 @@ import argparse
 import datetime
 
 parser = argparse.ArgumentParser()
-parser.add_argument("receivers",help="email address where updates should be sent to", nargs='+')
+parser.add_argument("id",help="hackernews id of the post")
+parser.add_argument("-receivers",help="email address where updates should be sent to", nargs='+')
 parser.add_argument("-sender",help="sender of the email\ndefaults to the first of the receivers")
 parser.add_argument("-output",help="name of the output file\n defaults to month+year", default='')
 parser.add_argument("-NoEmail",help="option to send an email in case new jobs have been posted", action='store_true')
@@ -29,7 +30,7 @@ else:
     path = month + '_' + year + '.html'
 
 root = "http://news.ycombinator.com/item?id="
-id = "9471287"
+id = args.id
 
 
 def cool_job(text):
