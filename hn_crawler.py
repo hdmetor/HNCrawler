@@ -96,7 +96,10 @@ posting_id = []
 posts = soup.findAll('td')[4].findAll('tr')
 
 # This jobs were already considered
-old_postings = [line.strip() for line in open(old_ids, 'r')]
+try:
+    old_postings = [line.strip() for line in open(old_ids, 'r')]
+except FileNotFoundError:
+    old_postings = [] = [line.strip() for line in open(old_ids, 'r')]
 
 infos = {}
 
