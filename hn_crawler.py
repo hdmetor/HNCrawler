@@ -14,6 +14,9 @@ parser.add_argument("-NoEmail",help="option to send an email in case new jobs ha
 
 args = parser.parse_args()
 
+# local changes
+smtpServer = ""
+file_loc = "old_ids.txt"
 
 day = str(datetime.datetime.now().day)
 month = str(datetime.datetime.now().month)
@@ -26,8 +29,8 @@ else:
     path = month + '_' + year + '.html'
 
 root = "http://news.ycombinator.com/item?id="
-id = "8394339"
-file_loc = 'appeared_id.txt'
+id = "9471287"
+
 
 def cool_job(text):
     small_text = text.lower()
@@ -43,7 +46,8 @@ def cool_job(text):
     conds = [string.lower() for string in locations + subjects + languages]
     return any([cond in small_text for cond in conds ])
 
-def create_file (list):
+def create_file (ids):
+    """Given a list of posting id, write to the file a formatted version of the post"""
     with open(path, 'a') as fp:
         title = '<h1>Date added: '+ day + '/ ' + month + '</h1>'
         fp.write(title)
@@ -53,8 +57,11 @@ def create_file (list):
             code = '<p><a href=' + root + id  + '>'+ '<h2>' + infos[id]['user'] + '</h2>' +'</a></p>' + '<p>' + str(infos[id]['text']) + '</p>'
             fp.write(code)
 
-def send_mail(list):
-    if list == []:
+def send_mail(posts):
+    """Given the posts, it send sends an email message to notify about the number of posts.
+    Options for the sender / receiver(s) are specified by the command line
+    """
+    if posts == []:
         return
     receivers = args.receivers
     if args.sender:
@@ -62,19 +69,15 @@ def send_mail(list):
     else:
         sender = receivers[0]
 
-
     message = """From: HN bot <bot@me.com>
-To: yourself <"""+ sender +""">
+To: yourself <""" + sender + """>
 Subject: New jobs form HackerNews
 
-There are """ + str(len(list)) + """ new job posting.
+There are """ + str(len(posts)) + """ new job posting.
 """
 
-    #for text in list:
-    #    message += '\n' + text
-
     try:
-        smtpObj = smtplib.SMTP('smtp.rcn.com')
+        smtpObj = smtplib.SMTP(smtpServer)
         smtpObj.sendmail(sender, receivers, message)
         print ("Successfully sent email")
     except SMTPException:
@@ -91,11 +94,13 @@ posting_id = []
 
 posts = soup.findAll('td')[4].findAll('tr')
 
+# This jobs were already considered
 old_postings = [line.strip() for line in open("news.txt", 'r')]
 
 infos = {}
 
 for post in posts[4:]:
+    # select a top post only
     if post.img != None and post.img.get('width') == '0':
         links = post.findAll('a')
         if links == []:
@@ -112,16 +117,12 @@ for post in posts[4:]:
                             'user' : user}
 
 
-new_posting = list(set(posting_id)- set(old_postings))
-
-
+new_posting = list(set(posting_id) - set(old_postings))
 if not args.NoEmail:
-
     send_mail(new_posting)
-
 create_file(new_posting)
 
-#write to the file only if no error were reised
+# archive ids for future use
 if new_posting != []:
     with open(file_loc, 'a+') as fp:
         for id in new_posting:
