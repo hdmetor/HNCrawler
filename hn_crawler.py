@@ -42,7 +42,7 @@ def cool_job(text):
                 'finance', 'financial',
                 'game', 'videogame',
                 'algo', 'algoritmic',
-                'machine learning', 'learning', 'deep learning']
+                'machine learning', 'learning', 'deep learning', 'deeplearning']
     languages = ['python', 'go', 'mathematica', 'c++', 'c']
     conds = [string.lower() for string in locations + subjects + languages]
     return any([cond in small_text for cond in conds ])
@@ -53,7 +53,10 @@ def create_file (ids):
         title = '<h1>Date added: '+ day + '/ ' + month + '</h1>'
         fp.write(title)
         for id in ids:
-            if str(infos[id]['text']) == '':
+            text = str(infos[id]['text'])
+            if not cool_job(text):
+                continue
+            if text == '':
                 return
             code = '<p><a href=' + root + id  + '>'+ '<h2>' + infos[id]['user'] + '</h2>' +'</a></p>' + '<p>' + str(infos[id]['text']) + '</p>'
             fp.write(code)
