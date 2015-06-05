@@ -1,31 +1,25 @@
 #Hacker News crawler for  _who's hiring?_ thread
 
-Saves only top level posts, comments / replies are removed.
+Only top level posts are saved, comments / replies are removed.
 
-Uses a file to store seen id, so that only new posting are added each time.
+A file is used to store id of posts already seen, so that only new posting are added each time.
 
-Sends an email with the number of new posting once the crawling is done.
+An optional email with the number of new posting once the crawling is done.
+
+Note: SMPT server need to be set before usage.
 
 Usage:
 
-    python3 hn_crawler.py you@email.com
+    python3 hn_crawler.py thread_id
 
-It is also possible to send to more than one receiver
+It is also possible to send an email with the result of the crawl (multiple receivers are also supported)
 
-    python3 hn_crawler.py you@email.com friend@email.com
+    python3 hn_crawler.py thread_id -receivers you@email.com friend@email.com
 
-The sender of the email can be changed (otherwise the first address will be used)
+The sender of the email can be changed (otherwise the first of the receivers will be used)
 
-    python3 hn_crawler.py you@email.com friend@email.com -sender me@email.com
+    python3 hn_crawler.py thread_id -receivers you@email.com friend@email.com -sender me@email.com
 
-Is it also possible to add the flag
+The output file is named `month_year.html`. To change that use the option
 
-    -NoEmail
-
-to create only the file withohut sending the email, and
-
-    -output name
-
-to rename the output file (defaults to `month_year.html`)
-
-
+    -output name myName
