@@ -20,6 +20,6 @@ The sender of the email can be changed (otherwise the first of the receivers wil
 
     python3 hn_crawler.py thread_id -receivers you@email.com friend@email.com -sender me@email.com
 
-The output file is named `month_year.html`. To change that use the option
+The output file is named `month_year.html`. To change that use the option (`.html` is added automatically)
 
-    -output name myName
+    -output myName
