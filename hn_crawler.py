@@ -34,6 +34,8 @@ id = args.id
 
 
 def cool_job(text):
+    """Given the text of the post, it flags it as interesting or not"""
+    # Note: Please use regex, instead of regular 'string in text' python syntax
     small_text = text.lower()
     locations = ['SF', 'San Francisco','bay', 'bay area' 'LA', 'Los Angeles', 'Venice', 'Santa Monica', 'nyc', 'ny']
     subjects = [
@@ -43,7 +45,7 @@ def cool_job(text):
                 'game', 'videogame',
                 'algo', 'algoritmic',
                 'machine learning', 'learning', 'deep learning', 'deeplearning']
-    languages = ['python', 'go', 'mathematica', 'c++', 'c']
+    languages = ['python', 'go', 'mathematica', 'c++']
     conds = [string.lower() for string in locations + subjects + languages]
     return any([cond in small_text for cond in conds ])
 
