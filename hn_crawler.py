@@ -128,7 +128,7 @@ for post in posts[4:]:
 
 new_posting = list(set(posting_id) - set(old_postings))
 
-if receivers:
+if args.receivers:
     send_mail(new_posting)
 create_file(new_posting)
 print("Found ", len(new_posting), " jobs!")
