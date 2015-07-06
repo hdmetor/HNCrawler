@@ -37,17 +37,17 @@ def cool_job(text):
     """Given the text of the post, it flags it as interesting or not"""
     # Note: Please use regex, instead of regular 'string in text' python syntax
     small_text = text.lower()
-    locations = ['SF', 'San Francisco','bay', 'bay area' 'LA', 'Los Angeles', 'Venice', 'Santa Monica', 'nyc', 'ny']
+    locations = ['SF', 'San Francisco', 'bay', 'bay area', 'nyc', 'ny']
     subjects = [
-                'data', 'Big Data', 'database'
+                'data', 'Big Data',
                 'Mathematics', 'Math',
                 'finance', 'financial',
                 'game', 'videogame',
                 'algo', 'algoritmic',
                 'machine learning', 'learning', 'deep learning', 'deeplearning']
-    languages = ['python', 'go', 'mathematica', 'c++']
+    languages = ['python', 'go', 'mathematica', 'c']
     conds = [string.lower() for string in locations + subjects + languages]
-    return any([cond in small_text for cond in conds ])
+    return any([findWholeWord(cond)(small_text) for cond in conds])
 
 def create_file (ids):
     """Given a list of posting id, write to the file a formatted version of the post"""
