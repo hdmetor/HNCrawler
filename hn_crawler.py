@@ -98,7 +98,7 @@ There are """ + str(len(posts)) + """ new job posting.
 request = Request(root  + id, headers={'User-Agent': 'Mozilla/5.0'})
 htmltext = urlopen(request).read()
 
-soup = BeautifulSoup(htmltext)
+soup = BeautifulSoup(htmltext, "html.parser")
 
 posting_id = []
 
