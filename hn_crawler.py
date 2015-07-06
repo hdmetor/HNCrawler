@@ -5,6 +5,7 @@ from datetime import datetime as dt
 import smtplib
 import argparse
 import datetime
+import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument("id",help="hackernews id of the post")
@@ -32,6 +33,9 @@ else:
 root = "http://news.ycombinator.com/item?id="
 id = args.id
 
+def whole_word(w):
+    "returns an object if the word is present, None otherwise"
+    return re.compile(r'\b({0})\b'.format(w), flags=re.IGNORECASE).search
 
 def cool_job(text):
     """Given the text of the post, it flags it as interesting or not"""
@@ -47,7 +51,7 @@ def cool_job(text):
                 'machine learning', 'learning', 'deep learning', 'deeplearning']
     languages = ['python', 'go', 'mathematica', 'c']
     conds = [string.lower() for string in locations + subjects + languages]
-    return any([findWholeWord(cond)(small_text) for cond in conds])
+    return any([whole_word(cond)(small_text) for cond in conds])
 
 def create_file (ids):
     """Given a list of posting id, write to the file a formatted version of the post"""
@@ -104,7 +108,7 @@ posts = soup.findAll('td')[4].findAll('tr')
 try:
     old_postings = [line.strip() for line in open(old_ids, 'r')]
 except FileNotFoundError:
-    old_postings = [] = [line.strip() for line in open(old_ids, 'r')]
+    old_postings = []
 
 infos = {}
 
@@ -118,10 +122,11 @@ for post in posts[4:]:
         else:
             index = links[0].get('href').index('&')
             id = links[0].get('href')[9:index]
-            user = links[1].get('href')[8:]
             posting_text = post.find('span', {'class':'comment'})
-            posting_id.append(id)
-            infos[id] = {
+            if cool_job(str(posting_text)):
+                user = links[1].get('href')[8:]
+                posting_id.append(id)
+                infos[id] = {
                             'text' : posting_text,
                             'user' : user}
 
