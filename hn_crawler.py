@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
-from urllib.request import Request, urlopen
+import requests
 from datetime import datetime as dt
 import smtplib
 import argparse
@@ -31,7 +30,7 @@ else:
     path = month + '_' + year + '.html'
 
 root = "http://news.ycombinator.com/item?id="
-id = args.id
+thread = args.id
 
 def whole_word(w):
     "returns an object if the word is present, None otherwise"
@@ -39,9 +38,8 @@ def whole_word(w):
 
 def cool_job(text):
     """Given the text of the post, it flags it as interesting or not"""
-    # Note: Please use regex, instead of regular 'string in text' python syntax
     small_text = text.lower()
-    locations = ['SF', 'San Francisco', 'bay', 'bay area', 'nyc', 'ny']
+    locations = ['SF', 'San Francisco', 'bay', 'bay area', 'ca']
     subjects = [
                 'data', 'Big Data',
                 'Mathematics', 'Math',
@@ -50,8 +48,9 @@ def cool_job(text):
                 'algo', 'algoritmic',
                 'machine learning', 'learning', 'deep learning', 'deeplearning']
     languages = ['python', 'go', 'mathematica', 'c']
-    conds = [string.lower() for string in locations + subjects + languages]
-    return any([whole_word(cond)(small_text) for cond in conds])
+    conds = [string.lower() for string in subjects + languages]
+
+    return any([whole_word(cond)(small_text) for cond in conds]) and any([whole_word(cond)(small_text) for cond in locations])
 
 def create_file (ids):
     """Given a list of posting id, write to the file a formatted version of the post"""
@@ -95,10 +94,9 @@ There are """ + str(len(posts)) + """ new job posting.
 
 
 
-request = Request(root  + id, headers={'User-Agent': 'Mozilla/5.0'})
-htmltext = urlopen(request).read()
-
-soup = BeautifulSoup(htmltext, "html.parser")
+r = requests.get(root  + thread, headers={'User-Agent': 'Mozilla/5.0'})
+assert r.status_code == 200
+soup = BeautifulSoup(r.text, "html.parser")
 
 posting_id = []
 
