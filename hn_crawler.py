@@ -2,9 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from functools import lru_cache
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import parallel_bulk
-
-thread = 12627852
+from elasticsearch import helpers
 
 def clean_text(data):
     try:
@@ -14,19 +12,26 @@ def clean_text(data):
     except KeyError:
           return {}
 
-@lru_cache(maxsize=5000)
-def fetch_hn_data(thread):
-    url = "https://hacker-news.firebaseio.com/v0/item/{}.json".format(thread)
-    r = requests.get(url)
-    assert r.status_code == 200
-    data = r.json()
-    data = clean_text(data)
+def fetch_hn_data(thread, type_='item'):
+    url = "https://hacker-news.firebaseio.com/v0/{}/{}.json".format(type_, thread)
+    try:
+        r = requests.get(url)
+        assert r.status_code == 200
+        data = r.json()
+        if type_ == 'item':
+            data = clean_text(data)
+    except Exception:
+        data = {}
     return data
-data = fetch_hn_data(thread)
 
-
-es = Elasticsearch()
-# es.indices.delete(index='hn')
+def find_hiring_thread():
+    all_posts = fetch_hn_data('whoishiring', type_='user')['submitted']
+    last_three_posts = sorted(all_posts)[-3:]
+    for post in last_three_posts:
+        data = fetch_hn_data(post)
+        if 'is hiring?' in fetch_hn_data(post)['text']:
+            break
+    return post
 
 mappings = {
     "mappings" : {
@@ -40,7 +45,9 @@ mappings = {
         }
     }
 }
-es.indices.create(index='hn', body=mappings)
+
+
+
 
 def format_data_for_action(post_id):
     data = fetch_hn_data(post_id)
@@ -54,19 +61,35 @@ def format_data_for_action(post_id):
         '_source': data
     }
 
-acts = [format_data_for_action(r) for r in data['kids'] if format_data_for_action(r)]
-list(parallel_bulk(es, acts))
+def update_thread(thread, es=None):
+    """Put into the index new child posts"""
 
-query = {"query" : {
-        "bool" : {
-            "must" : [{
-                "match": {'text' : 'san francisco'}},
-                {"match": {'text' : 'machine learning'}}
-            ]
-
+    if not es:
+        es = Elasticsearch()
+    currents_posts = fetch_hn_data(thread)['kids']
+    query = {
+        "_source": False,
+        'query': {
+            'term': {"parent": thread}
         }
+    }
+    older_posts_gen = helpers.scan(es, query)
+    old_posts_ids = {int(item['_id']) for item in older_posts_gen}
+    new_posts_ids = set(currents_posts) - old_posts_ids
+    if new_posts_ids:
+        print("There are {} new posts!".format(len(new_posts_ids)))
+        actions = [format_data_for_action(r)
+            for r in new_posts_ids
+            if format_data_for_action(r)]
+        list(helpers.parallel_bulk(es, actions))
 
-    }}
-
-#sanity check
-print(es.search(index='hn', body=query)['hits']['total'])
+if __name__ == '__main__':
+    es = Elasticsearch()
+    assert es.ping(), "Elasticsearch not started properly"
+    if not es.indices.exists(index='hn'):
+        print('The index does not extis, creating one')
+        es.indices.create(index='hn', body=mappings)
+    print('Looking for the latests hiring thread...')
+    thread = find_hiring_thread()
+    print('updating index...')
+    update_thread(thread, es)
